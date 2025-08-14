@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check": "ultracite lint",
+    "lint": "ultracite format",
+    "lint-fix": "ultracite format --unsafe"
   },
   "dependencies": {
     "next": "15.4.6",
