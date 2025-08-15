@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { type FormEvent, Suspense, useEffect, useState } from 'react';
 
 // Helper function to encode password with special character handling
-const encodePassword = (userPassword: string): string => {
+const _encodePassword = (userPassword: string): string => {
   return encodeURIComponent(userPassword).replace(/\*/g, '%2A');
 };
 
@@ -14,14 +14,18 @@ const buildAuthorizeUrl = (
   userPassword: string,
   token: string
 ): string => {
-  const encodedPassword = encodePassword(userPassword);
-  const baseUrl = 'https://api.inexogy.com/public/v1/oauth1/authorize';
-  const params = new URLSearchParams({
-    oauth_token: token,
-    email: userEmail,
-    password: encodedPassword,
-  });
-  return `${baseUrl}?${params.toString()}`;
+  const encodedPassword = encodeURIComponent(userPassword).replace(
+    /\*/g,
+    '%2A'
+  );
+
+  const encodedToken = encodeURIComponent(token);
+
+  const encodedEmail = encodeURIComponent(userEmail);
+
+  const baseUrl = 'https://api.inexogy.com/public/v1';
+
+  return `${baseUrl}/oauth1/authorize?oauth_token=${encodedToken}&email=${encodedEmail}&password=${encodedPassword}&oauth_callback=oob`;
 };
 
 // Helper function to extract OAuth verifier from response
