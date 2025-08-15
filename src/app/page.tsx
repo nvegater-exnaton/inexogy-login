@@ -3,10 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { type FormEvent, Suspense, useEffect, useState } from 'react';
 
-// Helper function to encode password with special character handling
-const _encodePassword = (userPassword: string): string => {
-  return encodeURIComponent(userPassword).replace(/\*/g, '%2A');
-};
 
 // Helper function to build authorization URL
 const buildAuthorizeUrl = (
