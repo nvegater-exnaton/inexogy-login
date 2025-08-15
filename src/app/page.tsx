@@ -24,13 +24,6 @@ const buildAuthorizeUrl = (
   return `${baseUrl}?${params.toString()}`;
 };
 
-// Helper function to get request headers
-const getRequestHeaders = () => ({
-  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  'User-Agent':
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119 Safari/537.36',
-});
-
 // Helper function to extract OAuth verifier from response
 const extractOAuthVerifier = (
   response: Response,
@@ -108,7 +101,11 @@ function HomeContent() {
       const authorizeUrl = buildAuthorizeUrl(email, password, oauthToken);
       const response = await fetch(authorizeUrl, {
         method: 'GET',
-        headers: getRequestHeaders(),
+        headers: {
+          Accept: 'application/x-www-form-urlencoded',
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119 Safari/537.36',
+        },
         redirect: 'manual',
       });
 
