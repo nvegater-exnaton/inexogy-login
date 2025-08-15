@@ -88,7 +88,7 @@ function HomeContent() {
 
   useEffect(() => {
     const token = searchParams.get('oauth_token');
-    const redirect = searchParams.get('redirect_url');
+    const redirect = searchParams.get('oauth_callback');
 
     if (token) {
       setOauthToken(token);
