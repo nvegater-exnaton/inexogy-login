@@ -3,7 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { type FormEvent, Suspense, useEffect, useState } from 'react';
 
-
 // Helper function to build authorization URL
 const buildAuthorizeUrl = (
   userEmail: string,
