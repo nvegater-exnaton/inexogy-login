@@ -29,19 +29,19 @@ const extractOAuthVerifier = (
   responseBody: string,
   authorizeUrl: string
 ): string | null => {
-    // Extract verifier from Location header or fallback to body
-    let oauthVerifier: string | null = null;
-    const loc = response.headers.get("location");
-    if (loc) {
-        const redirected = new URL(loc, authorizeUrl);
-        oauthVerifier = redirected.searchParams.get("oauth_verifier");
-    }
-    if (!oauthVerifier) {
-        const bodyParams = new URLSearchParams(responseBody);
-        oauthVerifier = bodyParams.get("oauth_verifier");
-    }
+  // Extract verifier from Location header or fallback to body
+  let oauthVerifier: string | null = null;
+  const loc = response.headers.get('location');
+  if (loc) {
+    const redirected = new URL(loc, authorizeUrl);
+    oauthVerifier = redirected.searchParams.get('oauth_verifier');
+  }
+  if (!oauthVerifier) {
+    const bodyParams = new URLSearchParams(responseBody);
+    oauthVerifier = bodyParams.get('oauth_verifier');
+  }
 
-    return oauthVerifier;
+  return oauthVerifier;
 };
 
 // Helper function to validate authorization response
@@ -49,10 +49,7 @@ const isAuthorizationSuccessful = (
   oauthVerifier: string | null,
   responseBody: string
 ): boolean => {
-  return !!(
-    oauthVerifier ||
-    responseBody.includes('oauth_verifier')
-  );
+  return !!(oauthVerifier || responseBody.includes('oauth_verifier'));
 };
 
 // Helper function to handle successful authorization redirect
