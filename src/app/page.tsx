@@ -29,30 +29,28 @@ const extractOAuthVerifier = (
   responseBody: string,
   authorizeUrl: string
 ): string | null => {
-  // Try to get verifier from redirect location header
-  const location = response.headers.get('location');
-  if (location) {
-    const redirectedUrl = new URL(location, authorizeUrl);
-    const verifier = redirectedUrl.searchParams.get('oauth_verifier');
-    if (verifier) {
-      return verifier;
+    // Extract verifier from Location header or fallback to body
+    let oauthVerifier: string | null = null;
+    const loc = response.headers.get("location");
+    if (loc) {
+        const redirected = new URL(loc, authorizeUrl);
+        oauthVerifier = redirected.searchParams.get("oauth_verifier");
     }
-  }
+    if (!oauthVerifier) {
+        const bodyParams = new URLSearchParams(responseBody);
+        oauthVerifier = bodyParams.get("oauth_verifier");
+    }
 
-  // Try to get verifier from response body
-  const bodyParams = new URLSearchParams(responseBody);
-  return bodyParams.get('oauth_verifier');
+    return oauthVerifier;
 };
 
 // Helper function to validate authorization response
 const isAuthorizationSuccessful = (
   oauthVerifier: string | null,
-  isRedirect: boolean,
   responseBody: string
 ): boolean => {
   return !!(
     oauthVerifier ||
-    isRedirect ||
     responseBody.includes('oauth_verifier')
   );
 };
@@ -109,7 +107,6 @@ function HomeContent() {
       });
 
       // Process response
-      const isRedirect = response.status >= 300 && response.status < 400;
       const responseBody = await response.text();
       const oauthVerifier = extractOAuthVerifier(
         response,
@@ -118,7 +115,7 @@ function HomeContent() {
       );
 
       // Validate authorization success
-      if (!isAuthorizationSuccessful(oauthVerifier, isRedirect, responseBody)) {
+      if (!isAuthorizationSuccessful(oauthVerifier, responseBody)) {
         throw new Error('Invalid credentials or authorization failed');
       }
 
