@@ -124,6 +124,8 @@ function HomeContent() {
         setError('Missing verifier or redirect URL');
       }
     } catch (err) {
+      // biome-ignore lint/suspicious/noConsole: We need to see this
+      console.error('Authorization failed:', JSON.stringify(err, null, 2));
       setError(err instanceof Error ? err.message : 'Authorization failed');
     } finally {
       setLoading(false);
