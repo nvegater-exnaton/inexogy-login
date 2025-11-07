@@ -75,6 +75,8 @@ function HomeContent() {
 
   useEffect(() => {
     const token = searchParams.get('oauth_token');
+    // biome-ignore lint/suspicious/noConsole: to check the token
+    console.log('Extracted token: ', token);
     const redirect = searchParams.get('oauth_callback');
 
     if (token) {
