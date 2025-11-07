@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: <explanation> */
 'use client';
 
 import { useSearchParams } from 'next/navigation';
@@ -86,22 +87,57 @@ function HomeContent() {
 
       // Process response from API route
       const data = await response.json();
+
+      // Check for API errors
+      if (!response.ok || data.error) {
+        // biome-ignore lint/suspicious/noConsole: We need to see this
+        console.error('Authorization API error:', {
+          status: response.status,
+          error: data.error,
+          details: data.details,
+          requestId: data.requestId,
+          body: data.body,
+        });
+        throw new Error(data.details || data.error || 'Authorization failed');
+      }
+
       const oauthVerifier = extractOAuthVerifier(data.location, data.body);
 
       // Validate authorization success
       if (!isAuthorizationSuccessful(oauthVerifier, data.body)) {
+        // biome-ignore lint/suspicious/noConsole: We need to see this
+        console.error('Authorization validation failed:', {
+          hasVerifier: !!oauthVerifier,
+          bodyPreview: data.body?.substring(0, 200),
+          location: data.location,
+          requestId: data.requestId,
+        });
         throw new Error('Invalid credentials or authorization failed');
       }
 
       // Handle successful authorization
       if (oauthVerifier && redirectUrl) {
+        // biome-ignore lint/suspicious/noConsole: Debug successful auth
+        console.log('Authorization successful, redirecting...', {
+          hasVerifier: true,
+          requestId: data.requestId,
+        });
         handleSuccessfulAuthorization(oauthVerifier, oauthToken, redirectUrl);
       } else {
+        // biome-ignore lint/suspicious/noConsole: We need to see this
+        console.error('Missing required data for redirect:', {
+          hasVerifier: !!oauthVerifier,
+          hasRedirectUrl: !!redirectUrl,
+          requestId: data.requestId,
+        });
         setError('Missing verifier or redirect URL');
       }
     } catch (err) {
       // biome-ignore lint/suspicious/noConsole: We need to see this
-      console.error('Authorization failed:', JSON.stringify(err, null, 2));
+      console.error('Authorization failed:', {
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      });
       setError(err instanceof Error ? err.message : 'Authorization failed');
     } finally {
       setLoading(false);
