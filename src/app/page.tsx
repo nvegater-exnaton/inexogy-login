@@ -161,7 +161,7 @@ function HomeContent() {
         <div className="text-center">
           <h1 className="font-bold text-3xl text-gray-900">Sign In</h1>
           <p className="mt-2 text-gray-600">
-            Enter your credentials to authorize
+            Enter your Inexogy credentials to authorize
           </p>
         </div>
 
