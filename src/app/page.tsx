@@ -86,10 +86,7 @@ function HomeContent() {
 
       // Process response from API route
       const data = await response.json();
-      const oauthVerifier = extractOAuthVerifier(
-        data.location,
-        data.body
-      );
+      const oauthVerifier = extractOAuthVerifier(data.location, data.body);
 
       // Validate authorization success
       if (!isAuthorizationSuccessful(oauthVerifier, data.body)) {
