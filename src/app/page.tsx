@@ -3,37 +3,15 @@
 import { useSearchParams } from 'next/navigation';
 import { type FormEvent, Suspense, useEffect, useState } from 'react';
 
-// Helper function to build authorization URL
-const buildAuthorizeUrl = (
-  userEmail: string,
-  userPassword: string,
-  token: string
-): string => {
-  const encodedPassword = encodeURIComponent(userPassword).replace(
-    /\*/g,
-    '%2A'
-  );
-
-  const encodedToken = encodeURIComponent(token);
-
-  const encodedEmail = encodeURIComponent(userEmail);
-
-  const baseUrl = 'https://api.inexogy.com/public/v1';
-
-  return `${baseUrl}/oauth1/authorize?oauth_token=${encodedToken}&email=${encodedEmail}&password=${encodedPassword}&oauth_callback=oob`;
-};
-
 // Helper function to extract OAuth verifier from response
 const extractOAuthVerifier = (
-  response: Response,
-  responseBody: string,
-  authorizeUrl: string
+  location: string | null,
+  responseBody: string
 ): string | null => {
   // Extract verifier from Location header or fallback to body
   let oauthVerifier: string | null = null;
-  const loc = response.headers.get('location');
-  if (loc) {
-    const redirected = new URL(loc, authorizeUrl);
+  if (location) {
+    const redirected = new URL(location, 'https://api.inexogy.com');
     oauthVerifier = redirected.searchParams.get('oauth_verifier');
   }
   if (!oauthVerifier) {
@@ -93,29 +71,28 @@ function HomeContent() {
     setError('');
 
     try {
-      // Build request URL and make API call
-      const authorizeUrl = buildAuthorizeUrl(email, password, oauthToken);
-      const response = await fetch(authorizeUrl, {
-        method: 'GET',
+      // Call server-side API route
+      const response = await fetch('/api/oauth1/authorize', {
+        method: 'POST',
         headers: {
-          Accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119 Safari/537.36',
+          'Content-Type': 'application/json',
         },
-        redirect: 'manual',
+        body: JSON.stringify({
+          email,
+          password,
+          oauthToken,
+        }),
       });
 
-      // Process response
-      const responseBody = await response.text();
+      // Process response from API route
+      const data = await response.json();
       const oauthVerifier = extractOAuthVerifier(
-        response,
-        responseBody,
-        authorizeUrl
+        data.location,
+        data.body
       );
 
       // Validate authorization success
-      if (!isAuthorizationSuccessful(oauthVerifier, responseBody)) {
+      if (!isAuthorizationSuccessful(oauthVerifier, data.body)) {
         throw new Error('Invalid credentials or authorization failed');
       }
 
