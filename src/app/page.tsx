@@ -96,7 +96,8 @@ function HomeContent() {
       const response = await fetch(authorizeUrl, {
         method: 'GET',
         headers: {
-          Accept: 'application/x-www-form-urlencoded',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         },
         redirect: 'manual',
       });
