@@ -1,8 +1,8 @@
-/** biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: <explanation> */
-'use client';
+/** biome-ignore-all lint/complexity/noExcessiveCognitiveComplexity: Form handler has multiple validation branches */
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { type FormEvent, Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from "next/navigation";
+import { type FormEvent, Suspense, useEffect, useState } from "react";
 
 // Helper function to extract OAuth verifier from response
 const extractOAuthVerifier = (
@@ -12,12 +12,12 @@ const extractOAuthVerifier = (
   // Extract verifier from Location header or fallback to body
   let oauthVerifier: string | null = null;
   if (location) {
-    const redirected = new URL(location, 'https://api.inexogy.com');
-    oauthVerifier = redirected.searchParams.get('oauth_verifier');
+    const redirected = new URL(location, "https://api.inexogy.com");
+    oauthVerifier = redirected.searchParams.get("oauth_verifier");
   }
   if (!oauthVerifier) {
     const bodyParams = new URLSearchParams(responseBody);
-    oauthVerifier = bodyParams.get('oauth_verifier');
+    oauthVerifier = bodyParams.get("oauth_verifier");
   }
 
   return oauthVerifier;
@@ -27,9 +27,7 @@ const extractOAuthVerifier = (
 const isAuthorizationSuccessful = (
   oauthVerifier: string | null,
   responseBody: string
-): boolean => {
-  return !!(oauthVerifier || responseBody.includes('oauth_verifier'));
-};
+): boolean => !!(oauthVerifier || responseBody.includes("oauth_verifier"));
 
 // Helper function to handle successful authorization redirect
 const handleSuccessfulAuthorization = (
@@ -38,25 +36,24 @@ const handleSuccessfulAuthorization = (
   targetRedirectUrl: string
 ) => {
   const finalRedirectUrl = new URL(targetRedirectUrl);
-  finalRedirectUrl.searchParams.set('oauth_verifier', oauthVerifier);
-  finalRedirectUrl.searchParams.set('oauth_token', token);
+  finalRedirectUrl.searchParams.set("oauth_verifier", oauthVerifier);
+  finalRedirectUrl.searchParams.set("oauth_token", token);
   window.location.href = finalRedirectUrl.toString();
 };
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [oauthToken, setOauthToken] = useState('');
-  const [redirectUrl, setRedirectUrl] = useState('');
+  const [error, setError] = useState("");
+  const [oauthToken, setOauthToken] = useState("");
+  const [redirectUrl, setRedirectUrl] = useState("");
 
   useEffect(() => {
-    const token = searchParams.get('oauth_token');
-    // biome-ignore lint/suspicious/noConsole: to check the token
-    console.log('Extracted token: ', token);
-    const redirect = searchParams.get('oauth_callback');
+    const token = searchParams.get("oauth_token");
+    console.log("Extracted token: ", token);
+    const redirect = searchParams.get("oauth_callback");
 
     if (token) {
       setOauthToken(token);
@@ -69,14 +66,14 @@ function HomeContent() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       // Call server-side API route
-      const response = await fetch('/api/oauth1/authorize', {
-        method: 'POST',
+      const response = await fetch("/api/oauth1/authorize", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
@@ -90,55 +87,50 @@ function HomeContent() {
 
       // Check for API errors
       if (!response.ok || data.error) {
-        // biome-ignore lint/suspicious/noConsole: We need to see this
-        console.error('Authorization API error:', {
+        console.error("Authorization API error:", {
           status: response.status,
           error: data.error,
           details: data.details,
           requestId: data.requestId,
           body: data.body,
         });
-        throw new Error(data.details || data.error || 'Authorization failed');
+        throw new Error(data.details || data.error || "Authorization failed");
       }
 
       const oauthVerifier = extractOAuthVerifier(data.location, data.body);
 
       // Validate authorization success
       if (!isAuthorizationSuccessful(oauthVerifier, data.body)) {
-        // biome-ignore lint/suspicious/noConsole: We need to see this
-        console.error('Authorization validation failed:', {
+        console.error("Authorization validation failed:", {
           hasVerifier: !!oauthVerifier,
           bodyPreview: data.body?.substring(0, 200),
           location: data.location,
           requestId: data.requestId,
         });
-        throw new Error('Invalid credentials or authorization failed');
+        throw new Error("Invalid credentials or authorization failed");
       }
 
       // Handle successful authorization
       if (oauthVerifier && redirectUrl) {
-        // biome-ignore lint/suspicious/noConsole: Debug successful auth
-        console.log('Authorization successful, redirecting...', {
+        console.log("Authorization successful, redirecting...", {
           hasVerifier: true,
           requestId: data.requestId,
         });
         handleSuccessfulAuthorization(oauthVerifier, oauthToken, redirectUrl);
       } else {
-        // biome-ignore lint/suspicious/noConsole: We need to see this
-        console.error('Missing required data for redirect:', {
+        console.error("Missing required data for redirect:", {
           hasVerifier: !!oauthVerifier,
           hasRedirectUrl: !!redirectUrl,
           requestId: data.requestId,
         });
-        setError('Missing verifier or redirect URL');
+        setError("Missing verifier or redirect URL");
       }
     } catch (err) {
-      // biome-ignore lint/suspicious/noConsole: We need to see this
-      console.error('Authorization failed:', {
+      console.error("Authorization failed:", {
         error: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
       });
-      setError(err instanceof Error ? err.message : 'Authorization failed');
+      setError(err instanceof Error ? err.message : "Authorization failed");
     } finally {
       setLoading(false);
     }
@@ -200,7 +192,7 @@ function HomeContent() {
             />
           </div>
 
-          {error && (
+          {error !== "" && (
             <div className="text-center text-red-600 text-sm">{error}</div>
           )}
 
@@ -209,7 +201,7 @@ function HomeContent() {
             disabled={loading}
             type="submit"
           >
-            {loading ? 'Authorizing...' : 'Sign In'}
+            {loading ? "Authorizing..." : "Sign In"}
           </button>
         </form>
       </div>
